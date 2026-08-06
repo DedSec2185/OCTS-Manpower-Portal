@@ -1,0 +1,50 @@
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: octs_user
+      POSTGRES_PASSWORD: octs_password_123
+      POSTGRES_DB: octs_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U octs_user -d octs_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  octs_backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://octs_user:octs_password_123@postgres_db:5432/octs_db
+      - ENVIRONMENT=production
+      - SECRET_KEY=your-secret-key-change-this-to-64-character-random-string-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=480
+    volumes:
+      - ./backend/employee_docs:/app/employee_docs
+      - ./backend/logs:/app/logs
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+
+  octs_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - octs_backend
+
+volumes:
+  postgres_data:

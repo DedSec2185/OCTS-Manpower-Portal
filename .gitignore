@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build & Output
+dist/
+frontend/dist/
+.vercel
+
+# Python / Virtual Environment
+venv/
+backend/venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environment variables
+.env
+.env.local
+backend/.env
+frontend/.env
+
+# Uploads (local media ignore, keep directory structure)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs & System files
+*.log
+.DS_Store
+Thumbs.db
