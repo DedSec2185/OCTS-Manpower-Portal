@@ -601,8 +601,13 @@ export function EmployeeForm({ employee, onSuccess, onDone }) {
             isAdmin={isAdmin} 
             isClerk={isClerk} 
             employee={currentEmployeeObj} 
-            onUpload={() => {
-              // Optionally refresh employee object here if needed, but file path updates are mostly handled
+            onUpload={async () => {
+              try {
+                const response = await employeeApi.getEmployee(currentEmployeeId);
+                setCurrentEmployeeObj(response.data);
+              } catch (e) {
+                console.error('Failed to refresh employee after doc update');
+              }
             }}
           />
         ) : (

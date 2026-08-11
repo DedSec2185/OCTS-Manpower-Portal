@@ -7,7 +7,7 @@ from app.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut, EmployeeLim
 from app.services import (
     create_employee, get_all_employees, get_employee_by_id,
     search_employees, update_employee, delete_employee,
-    save_file, get_file_download_response, get_file_column_name
+    save_file, get_file_download_response, get_file_column_name, delete_file
 )
 from app.utils import require_admin, require_admin_or_clerk, require_any_role, write_audit_log
 from app.models import AuditAction
@@ -137,6 +137,46 @@ async def delete_employee_record(
     """Delete employee record (admin only)"""
     delete_employee(db, employee_id, current_user.id)
     return {"message": "Employee deleted successfully"}
+
+
+@router.delete("/{employee_id}/upload/{doc_type}")
+async def delete_document(
+    employee_id: int,
+    doc_type: str,
+    current_user: User = Depends(require_admin_or_clerk),
+    db: Session = Depends(get_db)
+):
+    """Delete uploaded document for an employee (admin and clerk)"""
+    # Verify employee exists
+    employee = get_employee_by_id(db, employee_id)
+    
+    # Check if doc exists
+    column_name = get_file_column_name(doc_type)
+    file_path = getattr(employee, column_name)
+    if not file_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No {doc_type} document found for this employee"
+        )
+    
+    # Delete file
+    delete_file(employee_id, doc_type, file_path, db=db)
+    
+    # Update employee record
+    setattr(employee, column_name, None)
+    db.commit()
+    
+    # Audit log
+    write_audit_log(
+        db=db,
+        user_id=current_user.id,
+        action=AuditAction.DELETE,
+        target_type="employee_document",
+        target_id=employee_id,
+        details=f"Deleted {doc_type} document for employee {employee.full_name}"
+    )
+    
+    return {"message": f"{doc_type} deleted successfully"}
 
 
 @router.post("/{employee_id}/upload/{doc_type}")

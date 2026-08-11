@@ -32,6 +32,20 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
     }
   };
 
+  const handleDelete = async (docType) => {
+    if (!window.confirm(`Are you sure you want to remove the ${DOC_TYPES[docType]}?`)) return;
+    try {
+      setUploading(docType);
+      await employeeApi.deleteDocument(employeeId, docType);
+      toast.success(`${DOC_TYPES[docType]} removed successfully`);
+      if (onUpload) onUpload(); // refresh employee object
+    } catch (error) {
+      toast.error(`Failed to remove ${DOC_TYPES[docType]}`);
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const hasPermissionToUpload = isClerk || isAdmin;
   const canDownloadAll = isAdmin || isClerk;
   const canDownloadCV = isClerk || isAdmin;
@@ -87,12 +101,24 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
                 )}
 
                 {hasDoc && canDownload && (
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => handleDownload(docType)}
-                  >
-                    <Download size={14} /> Download
-                  </button>
+                  <>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleDownload(docType)}
+                    >
+                      <Download size={14} /> Download
+                    </button>
+                    {hasPermissionToUpload && (
+                      <button
+                        className="btn btn-sm"
+                        style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', marginLeft: '0.5rem' }}
+                        onClick={() => handleDelete(docType)}
+                        title="Remove Document"
+                      >
+                        <AlertCircle size={14} /> Remove
+                      </button>
+                    )}
+                  </>
                 )}
 
                 {!canDownload && (

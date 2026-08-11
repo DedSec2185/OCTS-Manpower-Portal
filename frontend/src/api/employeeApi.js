@@ -27,6 +27,9 @@ export const employeeApi = {
     });
   },
 
+  deleteDocument: (id, docType) =>
+    axiosClient.delete(`/employees/${id}/upload/${docType}`),
+
   downloadDocument: (id, docType) =>
     axiosClient.get(`/employees/${id}/download/${docType}`, {
       responseType: 'blob',

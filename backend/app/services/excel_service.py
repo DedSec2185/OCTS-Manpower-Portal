@@ -87,7 +87,7 @@ def export_to_excel(employees: List[Employee]) -> BytesIO:
             format_date(emp.pass_cancellation_date),
             format_date(emp.sign_on_date),
             format_date(emp.sign_off_date),
-            float(emp.per_day_salary) if emp.per_day_salary is not None else "",
+            emp.per_day_salary if emp.per_day_salary else "",
             emp.current_project or "",
             # New Fields
             emp.mother_name or "",

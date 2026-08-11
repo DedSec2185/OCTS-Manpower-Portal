@@ -221,6 +221,33 @@ def get_file_path(employee_id: int, doc_type: str, file_path: Optional[str]) -> 
     return str(full_path)
 
 
+def delete_file(employee_id: int, doc_type: str, file_path: Optional[str], db: Optional[Session] = None) -> None:
+    """Delete a specific document for an employee"""
+    if doc_type not in ALLOWED_DOC_TYPES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid document type: {doc_type}")
+    
+    # 1. Delete from DB
+    if db is not None:
+        try:
+            db.query(EmployeeDocument).filter(
+                EmployeeDocument.employee_id == employee_id,
+                EmployeeDocument.doc_type == doc_type
+            ).delete()
+            db.commit()
+        except Exception as e:
+            print(f"Warning: Failed deleting doc from DB: {e}")
+            db.rollback()
+            
+    # 2. Delete from filesystem
+    if file_path:
+        full_path = Path(settings.UPLOAD_DIR) / file_path
+        if full_path.exists():
+            try:
+                os.remove(full_path)
+            except Exception as e:
+                print(f"Notice: Could not delete local file: {e}")
+
+
 def delete_all_files(employee_id: int) -> None:
     """Delete all uploaded files for an employee"""
     try:

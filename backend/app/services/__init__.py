@@ -5,7 +5,7 @@ from app.services.employee_service import (
 )
 from app.services.file_service import (
     save_file, get_file_path, get_file_download_response, delete_all_files, get_file_column_name,
-    validate_file, ALLOWED_DOC_TYPES
+    validate_file, ALLOWED_DOC_TYPES, delete_file
 )
 from app.services.excel_service import export_to_excel, format_date
 
@@ -24,6 +24,7 @@ __all__ = [
     "get_file_path",
     "get_file_download_response",
     "delete_all_files",
+    "delete_file",
     "get_file_column_name",
     "validate_file",
     "ALLOWED_DOC_TYPES",
