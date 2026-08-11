@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
     
     # File uploads
-    UPLOAD_DIR: str = "employee_docs"
+    UPLOAD_DIR: str = "/tmp/employee_docs" if (os.getenv("VERCEL") or os.getenv("VERCEL_ENV")) else "employee_docs"
     MAX_FILE_SIZE_MB: int = 20
     
     # CORS

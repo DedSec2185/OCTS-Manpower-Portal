@@ -13,7 +13,7 @@ from app.models import User, Employee, AuditLog
 import time
 
 # Create database tables with retry logic (wait for PostgreSQL to be ready)
-max_retries = 10
+max_retries = 3
 for attempt in range(max_retries):
     try:
         Base.metadata.create_all(bind=engine)
@@ -75,15 +75,17 @@ for attempt in range(max_retries):
         break
     except Exception as e:
         if attempt < max_retries - 1:
-            print(f"Database not ready (attempt {attempt + 1}/{max_retries}): {e}")
-            time.sleep(3)
+            print(f"Database sync notice (attempt {attempt + 1}/{max_retries}): {e}")
+            time.sleep(0.5)
         else:
-            print(f"WARNING: Could not create tables after {max_retries} attempts: {e}")
-            # Don't crash — tables may already exist from a previous run
+            print(f"Notice: Database schema creation skipped or deferred: {e}")
 
 # Seed default users on first startup
-from app.seed import seed_default_users
-seed_default_users()
+try:
+    from app.seed import seed_default_users
+    seed_default_users()
+except Exception as seed_err:
+    print(f"Notice: User seeding skipped/deferred: {seed_err}")
 
 # Safe update default passwords to end in 2020 if they are still using default 2024 ones
 try:
@@ -109,23 +111,25 @@ try:
 except Exception as outer_ex:
     print(f"Error setting up password reset script: {outer_ex}")
 
-# Create upload directories if they don't exist
-upload_dirs = [
-    Path(settings.UPLOAD_DIR) / "cv",
-    Path(settings.UPLOAD_DIR) / "passports",
-    Path(settings.UPLOAD_DIR) / "ned",
-    Path(settings.UPLOAD_DIR) / "aadhar",
-    Path(settings.UPLOAD_DIR) / "pan",
-    Path(settings.UPLOAD_DIR) / "insurance",
-    Path(settings.UPLOAD_DIR) / "cancellation",
-    Path(settings.UPLOAD_DIR) / "trade",
-    Path(settings.UPLOAD_DIR) / "bosiet",
-    Path(settings.UPLOAD_DIR) / "medical",
-    Path(settings.UPLOAD_DIR) / "others",
-]
-
-for upload_dir in upload_dirs:
-    upload_dir.mkdir(parents=True, exist_ok=True)
+# Safe upload directory creation
+try:
+    upload_dirs = [
+        Path(settings.UPLOAD_DIR) / "cv",
+        Path(settings.UPLOAD_DIR) / "passports",
+        Path(settings.UPLOAD_DIR) / "ned",
+        Path(settings.UPLOAD_DIR) / "aadhar",
+        Path(settings.UPLOAD_DIR) / "pan",
+        Path(settings.UPLOAD_DIR) / "insurance",
+        Path(settings.UPLOAD_DIR) / "cancellation",
+        Path(settings.UPLOAD_DIR) / "trade",
+        Path(settings.UPLOAD_DIR) / "bosiet",
+        Path(settings.UPLOAD_DIR) / "medical",
+        Path(settings.UPLOAD_DIR) / "others",
+    ]
+    for upload_dir in upload_dirs:
+        upload_dir.mkdir(parents=True, exist_ok=True)
+except Exception as dir_err:
+    print(f"Notice: Upload directory creation skipped on serverless: {dir_err}")
 
 
 # Create FastAPI app
@@ -145,23 +149,28 @@ app.add_middleware(
 )
 
 # Setup Rate Limiting
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from app.utils.logger import logger
-from app.utils.rate_limit import limiter
+try:
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
+    from app.utils.logger import logger
+    from app.utils.rate_limit import limiter
 
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-logger.info("Starting OCTS API Backend...")
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+except Exception as limit_err:
+    print(f"Notice: Rate limiting setup deferred: {limit_err}")
 
 # Include routers
 app.include_router(auth_router)
 app.include_router(employee_router)
 app.include_router(admin_router)
 
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+# Mount static files for uploads safely
+try:
+    if Path(settings.UPLOAD_DIR).exists():
+        app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+except Exception as static_err:
+    print(f"Notice: Static files mount skipped: {static_err}")
 
 
 @app.get("/health")

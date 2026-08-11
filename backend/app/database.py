@@ -39,13 +39,14 @@ except OperationalError as e:
         raise e
     
     logger.warning(f"Database connection to '{db_url}' failed: {e}. Falling back to local SQLite.")
-    db_url = "sqlite:///./octs.db"
+    db_file = "/tmp/octs.db" if (os.getenv("VERCEL") or os.getenv("VERCEL_ENV")) else "./octs.db"
+    db_url = f"sqlite:///{db_file}"
     engine_args = {
         "echo": settings.DEBUG,
         "connect_args": {"check_same_thread": False}
     }
     engine = create_engine(db_url, **engine_args)
-    logger.info("Database connection established: Local SQLite (octs.db)")
+    logger.info(f"Database connection established: Local SQLite ({db_file})")
 
 # Session factory
 SessionLocal = sessionmaker(
