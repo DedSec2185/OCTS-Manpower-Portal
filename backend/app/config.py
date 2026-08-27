@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     
     # File uploads
     UPLOAD_DIR: str = "/tmp/employee_docs" if (os.getenv("VERCEL") or os.getenv("VERCEL_ENV")) else "employee_docs"
-    MAX_FILE_SIZE_MB: int = 20
+    MAX_FILE_SIZE_MB: int = 50
     
     # CORS
     ALLOWED_ORIGINS: List[str] = ["*"]

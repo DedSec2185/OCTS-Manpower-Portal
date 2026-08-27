@@ -51,6 +51,7 @@ export const DOC_TYPES = {
   trade_cert: 'Trade Certificate',
   bosiet_cert: 'BOSIET Certificate',
   medical_cert: 'Medical Certificate',
+  pcc_certificate: 'PCC Document',
   other_docs: 'Other Documents',
 };
 

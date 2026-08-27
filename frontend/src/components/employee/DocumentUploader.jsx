@@ -61,6 +61,7 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
     'trade_cert',
     'bosiet_cert',
     'medical_cert',
+    'pcc_certificate',
     'other_docs',
   ];
 
