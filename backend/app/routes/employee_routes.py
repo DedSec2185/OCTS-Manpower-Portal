@@ -263,6 +263,7 @@ def enrich_employee_with_file_status(employee) -> EmployeeOut:
     employee_dict["has_bosiet_cert"] = bool(employee.bosiet_cert_path)
     employee_dict["has_medical_cert"] = bool(employee.medical_cert_path)
     employee_dict["has_pcc_certificate"] = bool(employee.pcc_certificate_path)
+    employee_dict["has_photo"] = bool(employee.photo_file_path)
     employee_dict["has_other_docs"] = bool(employee.other_docs_path)
     
     return EmployeeOut(**employee_dict)

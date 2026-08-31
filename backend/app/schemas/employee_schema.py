@@ -202,6 +202,7 @@ class EmployeeOut(EmployeeBase):
     has_bosiet_cert: bool = False
     has_medical_cert: bool = False
     has_pcc_certificate: bool = False
+    has_photo: bool = False
     has_other_docs: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None

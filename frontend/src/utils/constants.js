@@ -29,6 +29,8 @@ export const DESIGNATION_OPTIONS = [
   'Mechanic',
   'Operator',
   'Supervisor',
+  'Material Assistant',
+  'ROUSTABOAT',
   'Other',
 ];
 
@@ -52,6 +54,7 @@ export const DOC_TYPES = {
   bosiet_cert: 'BOSIET Certificate',
   medical_cert: 'Medical Certificate',
   pcc_certificate: 'PCC Document',
+  photo: 'Photo',
   other_docs: 'Other Documents',
 };
 

@@ -64,6 +64,11 @@ ALLOWED_DOC_TYPES = {
         "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
         "column": "pcc_certificate_path"
     },
+    "photo": {
+        "path": "photos",
+        "allowed_ext": [".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"],
+        "column": "photo_file_path"
+    },
     "other_docs": {
         "path": "others",
         "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png", ".zip"],

@@ -73,6 +73,7 @@ for attempt in range(max_retries):
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_path VARCHAR(500);"))
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ned_pass_copy_path VARCHAR(500);"))
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS pcc_certificate_path VARCHAR(500);"))
+            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_file_path VARCHAR(500);"))
         break
     except Exception as e:
         if attempt < max_retries - 1:
@@ -127,6 +128,7 @@ try:
         Path(settings.UPLOAD_DIR) / "medical",
         Path(settings.UPLOAD_DIR) / "others",
         Path(settings.UPLOAD_DIR) / "pcc",
+        Path(settings.UPLOAD_DIR) / "photos",
     ]
     for upload_dir in upload_dirs:
         upload_dir.mkdir(parents=True, exist_ok=True)
