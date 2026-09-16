@@ -6,17 +6,87 @@ import { DOC_TYPES } from '../../utils/constants';
 import { downloadFile } from '../../utils/validators';
 import '../../../src/styles/components.css';
 
+// Helper to auto-compress large images client-side before sending to serverless Vercel
+const compressImageIfNeeded = async (file) => {
+  // Only compress images that exceed 2MB
+  if (!file.type.startsWith('image/') || file.size <= 2 * 1024 * 1024) {
+    return file;
+  }
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const maxDim = 1920;
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, employee }) {
   const [uploading, setUploading] = React.useState(null);
 
   const handleFileUpload = async (docType, file) => {
     try {
       setUploading(docType);
-      await employeeApi.uploadDocument(employeeId, docType, file);
-      toast.success(`${DOC_TYPES[docType]} uploaded successfully`);
+
+      // Auto-compress large images if necessary
+      let fileToUpload = file;
+      try {
+        fileToUpload = await compressImageIfNeeded(file);
+      } catch (cErr) {
+        console.warn('Image auto-compression skipped:', cErr);
+      }
+
+      // Check Vercel serverless 4.5MB payload limit
+      if (fileToUpload.size > 4.5 * 1024 * 1024) {
+        toast.error(`File is too large (${(fileToUpload.size / (1024 * 1024)).toFixed(1)}MB). Max upload size is 4.5MB.`);
+        setUploading(null);
+        return;
+      }
+
+      await employeeApi.uploadDocument(employeeId, docType, fileToUpload);
+      toast.success(`${DOC_TYPES[docType] || docType} uploaded successfully`);
       if (onUpload) onUpload();
     } catch (error) {
-      toast.error(`Failed to upload ${DOC_TYPES[docType]}`);
+      const serverMsg = error.response?.data?.detail;
+      const errorText = typeof serverMsg === 'string' ? serverMsg : (error.message || `Failed to upload ${DOC_TYPES[docType] || docType}`);
+      toast.error(errorText);
     } finally {
       setUploading(null);
     }

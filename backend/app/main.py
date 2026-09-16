@@ -19,62 +19,46 @@ for attempt in range(max_retries):
         Base.metadata.create_all(bind=engine)
         # Check and add phone_number column to users table
         from sqlalchemy import text
-        with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20);"))
-            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_email_verified BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS per_day_salary VARCHAR(100);"))
-            # Safely alter column type if it already exists as DECIMAL
-            conn.execute(text("ALTER TABLE employees ALTER COLUMN per_day_salary TYPE VARCHAR(100) USING per_day_salary::VARCHAR;"))
-            
-            # Safe migrations for Aadhar and Phone numbers
-            # aadhar_number is now optional — drop NOT NULL if it was previously set
-            conn.execute(text("ALTER TABLE employees ALTER COLUMN aadhar_number DROP NOT NULL;"))
-            conn.execute(text("UPDATE employees SET phone_number = '0000000000-' || id WHERE phone_number IS NULL;"))
-            conn.execute(text("ALTER TABLE employees ALTER COLUMN phone_number SET NOT NULL;"))
-            
-            conn.execute(text("""
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_employees_aadhar') THEN
-                        ALTER TABLE employees ADD CONSTRAINT uq_employees_aadhar UNIQUE (aadhar_number);
-                    END IF;
-                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_employees_phone') THEN
-                        ALTER TABLE employees ADD CONSTRAINT uq_employees_phone UNIQUE (phone_number);
-                    END IF;
-                END $$;
-            """))
-            
-            # Safe migrations for new Employee fields
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS mother_name VARCHAR(150);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS emergency_contact_number VARCHAR(30);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_account_number VARCHAR(50);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_name VARCHAR(150);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_ifsc_code VARCHAR(30);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_name VARCHAR(150);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_number VARCHAR(30);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_address TEXT;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS joining_date DATE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_boiler_suit_size VARCHAR(20);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_issue_date DATE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_shoe_size VARCHAR(20);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_status BOOLEAN DEFAULT FALSE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_issue_date DATE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_issue_place VARCHAR(150);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS exit_date DATE;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS exit_remarks TEXT;"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS current_project VARCHAR(100);"))
-            
-            # File paths columns
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS aadhar_card_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS pan_card_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS insurance_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS pass_cancellation_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ned_pass_copy_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS pcc_certificate_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_file_path VARCHAR(500);"))
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_details_path VARCHAR(500);"))
+        migrations = [
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number VARCHAR(20);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_email_verified BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_phone_verified BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS per_day_salary VARCHAR(100);",
+            "ALTER TABLE employees ALTER COLUMN aadhar_number DROP NOT NULL;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS mother_name VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS emergency_contact_number VARCHAR(30);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_account_number VARCHAR(50);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_name VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_ifsc_code VARCHAR(30);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_name VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_number VARCHAR(30);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS nominee_address TEXT;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS joining_date DATE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_boiler_suit_size VARCHAR(20);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_issue_date DATE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS ppe_shoe_size VARCHAR(20);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_status BOOLEAN DEFAULT FALSE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_issue_date DATE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_issue_place VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS exit_date DATE;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS exit_remarks TEXT;",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS current_project VARCHAR(100);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS aadhar_card_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS pan_card_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS insurance_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS pass_cancellation_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS trade_certificate_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS ned_pass_copy_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS pcc_certificate_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_file_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_details_path VARCHAR(500);",
+        ]
+        for mig_sql in migrations:
+            try:
+                with engine.begin() as conn:
+                    conn.execute(text(mig_sql))
+            except Exception as single_err:
+                print(f"Migration note ({mig_sql[:40]}...): {single_err}")
         break
     except Exception as e:
         if attempt < max_retries - 1:

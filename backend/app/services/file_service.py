@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Universal allowed document extensions (PDF, images, Word, Excel/Spreadsheets)
 UNIVERSAL_DOC_EXTS = [
-    ".pdf", ".jpg", ".jpeg", ".png", ".webp",
+    ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".heic", ".heif", ".bmp", ".gif", ".tiff",
     ".doc", ".docx", ".xls", ".xlsx", ".csv"
 ]
 
@@ -77,12 +77,12 @@ ALLOWED_DOC_TYPES = {
     },
     "photo": {
         "path": "photos",
-        "allowed_ext": [".jpg", ".jpeg", ".png", ".webp", ".pdf", ".doc", ".docx"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "photo_file_path"
     },
     "other_docs": {
         "path": "others",
-        "allowed_ext": UNIVERSAL_DOC_EXTS + [".zip", ".rar"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS + [".zip", ".rar", ".7z"],
         "column": "other_docs_path"
     }
 }
@@ -97,13 +97,32 @@ def validate_file(file: UploadFile, doc_type: str) -> None:
         )
     
     # Get file extension
-    file_ext = os.path.splitext(file.filename)[1].lower()
+    file_ext = os.path.splitext(file.filename or "")[1].lower()
+    
+    # Fallback: infer extension from content_type if missing from filename
+    if not file_ext and file.content_type:
+        ct = file.content_type.lower()
+        if "jpeg" in ct or "jpg" in ct:
+            file_ext = ".jpg"
+        elif "png" in ct:
+            file_ext = ".png"
+        elif "webp" in ct:
+            file_ext = ".webp"
+        elif "pdf" in ct:
+            file_ext = ".pdf"
+        elif "heic" in ct:
+            file_ext = ".heic"
+        elif "word" in ct:
+            file_ext = ".docx"
+        elif "sheet" in ct or "excel" in ct:
+            file_ext = ".xlsx"
+            
     allowed_exts = ALLOWED_DOC_TYPES[doc_type]["allowed_ext"]
     
     if file_ext not in allowed_exts:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid file type. Allowed: {', '.join(allowed_exts)}"
+            detail=f"Invalid file type '{file_ext}'. Allowed: {', '.join(allowed_exts)}"
         )
 
 

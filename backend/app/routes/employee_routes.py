@@ -195,21 +195,43 @@ async def upload_document(
     file_path = await save_file(employee_id, doc_type, file, db=db)
     
     # Update employee record with file path
+    from sqlalchemy import text
     column_name = get_file_column_name(doc_type)
-    setattr(employee, column_name, file_path)
+    try:
+        setattr(employee, column_name, file_path)
+        if doc_type == "photo":
+            employee.photo_received = True
+        db.commit()
+        db.refresh(employee)
+    except Exception as db_err:
+        db.rollback()
+        # Fallback auto-repair: ensure column exists in live DB and retry
+        try:
+            db.execute(text(f"ALTER TABLE employees ADD COLUMN IF NOT EXISTS {column_name} VARCHAR(500);"))
+            db.commit()
+            setattr(employee, column_name, file_path)
+            if doc_type == "photo":
+                employee.photo_received = True
+            db.commit()
+            db.refresh(employee)
+        except Exception as retry_err:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to save {doc_type} to employee record: {str(retry_err)}"
+            )
     
-    db.commit()
-    db.refresh(employee)
-    
-    # Write audit log
-    write_audit_log(
-        db=db,
-        user_id=current_user.id,
-        action=AuditAction.FILE_UPLOAD,
-        table_name="employees",
-        record_id=employee_id,
-        new_value={"doc_type": doc_type, "file_path": file_path}
-    )
+    # Write audit log safely
+    try:
+        write_audit_log(
+            db=db,
+            user_id=current_user.id,
+            action=AuditAction.FILE_UPLOAD,
+            table_name="employees",
+            record_id=employee_id,
+            new_value={"doc_type": doc_type, "file_path": file_path}
+        )
+    except Exception as audit_err:
+        print(f"Notice: Audit log skipped for {doc_type} upload: {audit_err}")
     
     return {
         "message": f"{doc_type} uploaded successfully",
