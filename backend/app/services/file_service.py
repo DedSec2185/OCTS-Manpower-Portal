@@ -7,71 +7,82 @@ from typing import Optional, Dict
 from datetime import datetime
 
 
+# Universal allowed document extensions (PDF, images, Word, Excel/Spreadsheets)
+UNIVERSAL_DOC_EXTS = [
+    ".pdf", ".jpg", ".jpeg", ".png", ".webp",
+    ".doc", ".docx", ".xls", ".xlsx", ".csv"
+]
+
 # Document type configurations
 ALLOWED_DOC_TYPES = {
     "cv": {
         "path": "cv",
-        "allowed_ext": [".pdf"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "cv_pdf_path"
     },
     "passport_copy": {
         "path": "passports",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "passport_copy_path"
     },
     "ned_pass_copy": {
         "path": "ned",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "ned_pass_copy_path"
     },
     "aadhar_card": {
         "path": "aadhar",
-        "allowed_ext": [".pdf"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "aadhar_card_path"
     },
     "pan_card": {
         "path": "pan",
-        "allowed_ext": [".pdf"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "pan_card_path"
+    },
+    "bank_details": {
+        "path": "bank",
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
+        "column": "bank_details_path"
     },
     "insurance": {
         "path": "insurance",
-        "allowed_ext": [".pdf"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "insurance_path"
     },
     "pass_cancellation": {
         "path": "cancellation",
-        "allowed_ext": [".pdf"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "pass_cancellation_path"
     },
     "trade_cert": {
         "path": "trade",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "trade_certificate_path"
     },
     "bosiet_cert": {
         "path": "bosiet",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "bosiet_cert_path"
     },
     "medical_cert": {
         "path": "medical",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "medical_cert_path"
     },
     "pcc_certificate": {
         "path": "pcc",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS,
         "column": "pcc_certificate_path"
     },
     "photo": {
         "path": "photos",
-        "allowed_ext": [".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx"],
+        "allowed_ext": [".jpg", ".jpeg", ".png", ".webp", ".pdf", ".doc", ".docx"],
         "column": "photo_file_path"
     },
     "other_docs": {
         "path": "others",
-        "allowed_ext": [".pdf", ".jpg", ".jpeg", ".png", ".zip"],
+        "allowed_ext": UNIVERSAL_DOC_EXTS + [".zip", ".rar"],
         "column": "other_docs_path"
     }
 }

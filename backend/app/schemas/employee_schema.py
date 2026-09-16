@@ -204,6 +204,7 @@ class EmployeeOut(EmployeeBase):
     has_pcc_certificate: bool = False
     has_photo: bool = False
     has_other_docs: bool = False
+    has_bank_details: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -216,13 +217,13 @@ class EmployeeLimited(BaseModel):
     id: int
     sr_no: int
     full_name: str
-    designation: str
-    passport_number: str
+    designation: Optional[str] = None
+    passport_number: Optional[str] = None
     passport_expiry_date: Optional[date] = None
-    bosiet_done: bool
+    bosiet_done: Optional[bool] = False
     sign_on_date: Optional[date] = None
     sign_off_date: Optional[date] = None
-    current_status: str
+    current_status: Optional[str] = None
     nationality: Optional[str] = None
 
     class Config:

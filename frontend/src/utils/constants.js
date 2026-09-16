@@ -43,13 +43,14 @@ export const PROJECT_OPTIONS = [
 ];
 
 export const DOC_TYPES = {
-  cv: 'CV / Resume PDF',
+  cv: 'CV / Resume',
   passport_copy: 'Passport Copy',
   ned_pass_copy: 'NED Pass Copy',
-  aadhar_card: 'Aadhar Card PDF',
-  pan_card: 'PAN Card PDF',
-  insurance: 'Insurance PDF',
-  pass_cancellation: 'Pass Cancellation PDF',
+  aadhar_card: 'Aadhar Card',
+  pan_card: 'PAN Card',
+  bank_details: 'Bank Details (Passbook / Cheque)',
+  insurance: 'Insurance Document',
+  pass_cancellation: 'Pass Cancellation',
   trade_cert: 'Trade Certificate',
   bosiet_cert: 'BOSIET Certificate',
   medical_cert: 'Medical Certificate',

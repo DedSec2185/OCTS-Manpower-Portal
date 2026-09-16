@@ -8,6 +8,7 @@ frontend/dist/
 .vercel
 
 # Python / Virtual Environment
+.venv/
 venv/
 backend/venv/
 env/

@@ -74,6 +74,7 @@ for attempt in range(max_retries):
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS ned_pass_copy_path VARCHAR(500);"))
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS pcc_certificate_path VARCHAR(500);"))
             conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_file_path VARCHAR(500);"))
+            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_details_path VARCHAR(500);"))
         break
     except Exception as e:
         if attempt < max_retries - 1:

@@ -149,6 +149,7 @@ class Employee(Base):
     trade_certificate_path = Column(String(500))
     ned_pass_copy_path = Column(String(500))
     pcc_certificate_path = Column(String(500))
+    bank_details_path = Column(String(500))
 
     # Audit
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)

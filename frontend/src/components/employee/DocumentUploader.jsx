@@ -25,10 +25,26 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
   const handleDownload = async (docType) => {
     try {
       const response = await employeeApi.downloadDocument(employeeId, docType);
-      const filename = `${employee.full_name}_${docType}.pdf`;
+      let filename = `${employee.full_name || 'Employee'}_${docType}`;
+      const disposition = response.headers?.['content-disposition'];
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          filename = match[1];
+        }
+      } else {
+        const contentType = response.headers?.['content-type'] || '';
+        if (contentType.includes('jpeg') || contentType.includes('jpg')) filename += '.jpg';
+        else if (contentType.includes('png')) filename += '.png';
+        else if (contentType.includes('webp')) filename += '.webp';
+        else if (contentType.includes('word') || contentType.includes('officedocument.wordprocessingml')) filename += '.docx';
+        else if (contentType.includes('excel') || contentType.includes('officedocument.spreadsheetml')) filename += '.xlsx';
+        else if (contentType.includes('csv')) filename += '.csv';
+        else filename += '.pdf';
+      }
       downloadFile(response.data, filename);
     } catch (error) {
-      toast.error(`Failed to download ${DOC_TYPES[docType]}`);
+      toast.error(`Failed to download ${DOC_TYPES[docType] || docType}`);
     }
   };
 
@@ -56,6 +72,7 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
     'ned_pass_copy',
     'aadhar_card',
     'pan_card',
+    'bank_details',
     'insurance',
     'pass_cancellation',
     'trade_cert',
@@ -68,13 +85,18 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
 
   return (
     <div className="documents-container">
-      <h3>📋 Documents</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '1rem' }}>
+        <h3 style={{ margin: 0 }}>📋 Employee Documents</h3>
+        <span style={{ fontSize: '12px', color: '#64748b', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontWeight: '500' }}>
+          Accepted: PDF, JPG, JPEG, PNG, Word (DOC/DOCX), Excel (XLS/XLSX)
+        </span>
+      </div>
 
       <div className="documents-grid">
         {docTypes.map((docType) => {
           const hasDoc = employee?.[`has_${docType}`];
           const canDownload = docType === 'cv' ? canDownloadCV : canDownloadAll;
-          const docLabel = DOC_TYPES[docType];
+          const docLabel = DOC_TYPES[docType] || docType;
 
           return (
             <div key={docType} className="document-card">
@@ -87,10 +109,11 @@ export function DocumentUploader({ employeeId, isClerk, isAdmin, onUpload, emplo
 
               <div className="doc-actions">
                 {hasPermissionToUpload && (
-                  <label className="btn btn-secondary btn-sm">
+                  <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
                     Upload
                     <input
                       type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.csv,image/*"
                       hidden
                       onChange={(e) => {
                         if (e.target.files?.[0]) {
