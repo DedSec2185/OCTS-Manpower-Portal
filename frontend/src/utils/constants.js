@@ -40,6 +40,7 @@ export const PROJECT_OPTIONS = [
   'OCS - Panna',
   'OCS - Tapti',
   'Technocrats',
+  'L&T - L T LIMITED',
 ];
 
 export const DOC_TYPES = {

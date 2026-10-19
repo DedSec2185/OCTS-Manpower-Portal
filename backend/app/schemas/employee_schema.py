@@ -224,6 +224,8 @@ class EmployeeLimited(BaseModel):
     sign_on_date: Optional[date] = None
     sign_off_date: Optional[date] = None
     current_status: Optional[str] = None
+    current_project: Optional[str] = None
+    phone_number: Optional[str] = None
     nationality: Optional[str] = None
 
     class Config:
