@@ -41,6 +41,7 @@ export const PROJECT_OPTIONS = [
   'OCS - Tapti',
   'Technocrats',
   'L&T - L T LIMITED',
+  'CCPL - CHOWGULE ABS MARINE CONSORTIUM',
 ];
 
 export const DOC_TYPES = {

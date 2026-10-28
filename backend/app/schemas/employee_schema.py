@@ -77,6 +77,11 @@ class EmployeeBase(BaseModel):
     education: Optional[str] = None
     skills: Optional[str] = None
     per_day_salary: Optional[str] = Field(None, max_length=100)
+    onshore_salary: Optional[str] = Field(None, max_length=150)
+    offshore_salary: Optional[str] = Field(None, max_length=150)
+    onshore_ot_hrs: Optional[str] = Field(None, max_length=150)
+    offshore_ot_hrs: Optional[str] = Field(None, max_length=150)
+    allowance: Optional[str] = Field(None, max_length=150)
 
     # New Fields
     mother_name: Optional[str] = Field(None, max_length=150)
@@ -165,6 +170,11 @@ class EmployeeUpdate(BaseModel):
     education: Optional[str] = None
     skills: Optional[str] = None
     per_day_salary: Optional[str] = Field(None, max_length=100)
+    onshore_salary: Optional[str] = Field(None, max_length=150)
+    offshore_salary: Optional[str] = Field(None, max_length=150)
+    onshore_ot_hrs: Optional[str] = Field(None, max_length=150)
+    offshore_ot_hrs: Optional[str] = Field(None, max_length=150)
+    allowance: Optional[str] = Field(None, max_length=150)
     
     # New Fields
     mother_name: Optional[str] = None

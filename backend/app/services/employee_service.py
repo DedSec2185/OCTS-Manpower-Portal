@@ -170,6 +170,8 @@ def search_employees(
                 query = query.filter(Employee.cdc_number.ilike(f"%{query_str}%"))
             elif field == "designation":
                 query = query.filter(Employee.designation.ilike(f"%{query_str}%"))
+            elif field == "current_project":
+                query = query.filter(Employee.current_project.ilike(f"%{query_str}%"))
         else:
             # Search across all searchable fields
             query = query.filter(
@@ -180,6 +182,7 @@ def search_employees(
                     Employee.phone_number == query_str,
                     Employee.cdc_number.ilike(f"%{query_str}%"),
                     Employee.designation.ilike(f"%{query_str}%"),
+                    Employee.current_project.ilike(f"%{query_str}%"),
                 )
             )
     
@@ -267,20 +270,28 @@ def update_employee(
     update_data = data.dict(exclude_unset=True)
 
     # Check for unauthorized salary update
-    if "per_day_salary" in update_data:
+    salary_fields = [
+        "per_day_salary",
+        "onshore_salary",
+        "offshore_salary",
+        "onshore_ot_hrs",
+        "offshore_ot_hrs",
+        "allowance",
+    ]
+    if any(sf in update_data for sf in salary_fields):
         # Get role of the user updating this employee
         updating_user = db.query(User).filter(User.id == updated_by_id).first()
         # If user is clerk (or anything not admin) or not found, prevent salary change
         if not updating_user or updating_user.role.value != "admin":
-            # If the value is actually changing from what's currently in the database
-            current_salary = employee.per_day_salary
-            new_salary = update_data["per_day_salary"]
-            # Treat numeric precision comparison carefully
-            if current_salary != new_salary:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Clerks and non-admin users are not authorized to update employee salary details."
-                )
+            for sf in salary_fields:
+                if sf in update_data:
+                    current_val = getattr(employee, sf)
+                    new_val = update_data[sf]
+                    if current_val != new_val:
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Clerks and non-admin users are not authorized to update employee salary details."
+                        )
 
     for field, value in update_data.items():
         setattr(employee, field, value)

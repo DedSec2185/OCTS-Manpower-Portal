@@ -35,6 +35,11 @@ def export_to_excel(employees: List[Employee]) -> BytesIO:
         "Pass Cancellation",
         "Sign On",
         "Sign Off",
+        "Onshore Salary",
+        "Offshore Salary",
+        "Onshore OT Hrs.",
+        "Offshore OT Hrs.",
+        "Allowance",
         "Salary/Day",
         "Current Project",
         # New Fields
@@ -87,6 +92,11 @@ def export_to_excel(employees: List[Employee]) -> BytesIO:
             format_date(emp.pass_cancellation_date),
             format_date(emp.sign_on_date),
             format_date(emp.sign_off_date),
+            emp.onshore_salary or "",
+            emp.offshore_salary or "",
+            emp.onshore_ot_hrs or "",
+            emp.offshore_ot_hrs or "",
+            emp.allowance or "",
             emp.per_day_salary if emp.per_day_salary else "",
             emp.current_project or "",
             # New Fields
@@ -120,12 +130,11 @@ def export_to_excel(employees: List[Employee]) -> BytesIO:
         col_letter = col[0].column_letter
         ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
     
-    # Center align all columns except Name and Remarks (which should be left-aligned)
+    # Center align all columns except Name, Remarks, and Addresses (which should be left-aligned)
+    left_aligned_headers = {"Name", "Received Documents", "Remark", "Nominee Address", "Exit Remarks"}
     for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_row=len(employees)+1, min_col=1, max_col=len(headers))):
         for col_idx, cell in enumerate(row):
-            # Name (col B = index 1), Nominee Address (col Y = index 24), Exit Remarks (col AI = index 34)
-            # Experience/Remarks (col I = index 8, col J = index 9) are left-aligned
-            if col_idx in [1, 8, 9, 24, 34]:
+            if headers[col_idx] in left_aligned_headers:
                 cell.alignment = Alignment(horizontal="left", vertical="center")
             else:
                 cell.alignment = Alignment(horizontal="center", vertical="center")

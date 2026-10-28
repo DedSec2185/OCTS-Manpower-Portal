@@ -107,9 +107,11 @@ export function AdminDashboard() {
     if (!quickSearch.trim()) return employees;
     const q = quickSearch.toLowerCase();
     return employees.filter(emp =>
+      (emp.full_name && emp.full_name.toLowerCase().includes(q)) ||
       (emp.name && emp.name.toLowerCase().includes(q)) ||
       (emp.designation && emp.designation.toLowerCase().includes(q)) ||
-      (emp.passport_number && emp.passport_number.toLowerCase().includes(q))
+      (emp.passport_number && emp.passport_number.toLowerCase().includes(q)) ||
+      (emp.current_project && emp.current_project.toLowerCase().includes(q))
     );
   }, [employees, quickSearch]);
 

@@ -131,6 +131,11 @@ class Employee(Base):
     education = Column(Text)
     skills = Column(Text)
     per_day_salary = Column(String(100), nullable=True)
+    onshore_salary = Column(String(150), nullable=True)
+    offshore_salary = Column(String(150), nullable=True)
+    onshore_ot_hrs = Column(String(150), nullable=True)
+    offshore_ot_hrs = Column(String(150), nullable=True)
+    allowance = Column(String(150), nullable=True)
 
     # File Paths
     cv_pdf_path = Column(String(500))

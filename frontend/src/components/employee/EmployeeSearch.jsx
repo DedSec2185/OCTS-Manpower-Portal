@@ -49,7 +49,7 @@ export function EmployeeSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, passport, phone, CDC no..."
+            placeholder="Search by name, passport, phone, project, CDC no..."
             className="search-input"
           />
 
@@ -61,6 +61,7 @@ export function EmployeeSearch() {
             <option value="phone_number">Phone</option>
             <option value="cdc_number">CDC No</option>
             <option value="designation">Designation</option>
+            <option value="current_project">Project</option>
           </select>
 
           <select value={designation} onChange={(e) => setDesignation(e.target.value)} className="search-select">

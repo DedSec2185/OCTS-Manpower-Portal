@@ -535,22 +535,93 @@ export function EmployeeForm({ employee, onSuccess, onDone }) {
           <div className="form-row">
             <div className="form-group">
               <label>Total Experience (Years)</label>
-              <input type="number" step="0.5" {...register('total_experience_years')} />
+              <input type="number" step="0.5" {...register('total_experience_years')} placeholder="e.g. 5" />
             </div>
-            <div className="form-group">
-              <label>Per Day Salary (INR/USD)</label>
-              <input
-                type="text"
-                {...register('per_day_salary')}
-                placeholder="e.g. 2400 + 200"
-                disabled={employee?.id && !isAdmin}
-              />
-              {employee?.id && !isAdmin && (
-                <span className="field-hint" style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
-                  Only administrators can modify salary settings.
-                </span>
+          </div>
+
+          <div
+            style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '1.25rem',
+              marginBottom: '1.25rem',
+            }}
+          >
+            <h4 style={{ margin: '0 0 1rem 0', color: '#0f172a', fontSize: '1rem' }}>
+              Salary Drawn (Onshore & Offshore)
+            </h4>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Onshore Salary</label>
+                <input
+                  type="text"
+                  {...register('onshore_salary')}
+                  placeholder="e.g. Rs 700/- at onshore"
+                  disabled={Boolean(employee?.id && !isAdmin)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Offshore Salary</label>
+                <input
+                  type="text"
+                  {...register('offshore_salary')}
+                  placeholder="e.g. Rs 1050/- at offshore for 12 hrs duty"
+                  disabled={Boolean(employee?.id && !isAdmin)}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Onshore OT hrs.</label>
+                <input
+                  type="text"
+                  {...register('onshore_ot_hrs')}
+                  placeholder="e.g. at actual"
+                  disabled={Boolean(employee?.id && !isAdmin)}
+                />
+              </div>
+              <div className="form-group">
+                <label>Offshore OT hrs.</label>
+                <input
+                  type="text"
+                  {...register('offshore_ot_hrs')}
+                  placeholder="e.g. at actual"
+                  disabled={Boolean(employee?.id && !isAdmin)}
+                />
+              </div>
+            </div>
+
+            <div className="form-row" style={{ marginBottom: 0 }}>
+              <div className="form-group">
+                <label>Allowance</label>
+                <input
+                  type="text"
+                  {...register('allowance')}
+                  placeholder="Enter allowance details (optional)"
+                  disabled={Boolean(employee?.id && !isAdmin)}
+                />
+              </div>
+              {employee?.per_day_salary && (
+                <div className="form-group">
+                  <label>Previous Per Day Salary (Legacy)</label>
+                  <input
+                    type="text"
+                    {...register('per_day_salary')}
+                    placeholder="e.g. 2400 + 200"
+                    disabled={Boolean(employee?.id && !isAdmin)}
+                  />
+                </div>
               )}
             </div>
+
+            {employee?.id && !isAdmin && (
+              <span className="field-hint" style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', display: 'block' }}>
+                Only administrators can modify salary settings.
+              </span>
+            )}
           </div>
 
           <div className="form-group">

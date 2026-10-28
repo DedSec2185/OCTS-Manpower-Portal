@@ -240,15 +240,33 @@ export function EmployeeDetailsPage() {
           )}
 
           {activeTab === 'professional' && !isLimitedView && (
-            <EmployeeDetailsCard title="Professional Experience" icon="💼">
-              <div className="info-grid">
-                <DetailItem label="Experience (Years)" value={employee.total_experience_years} />
-                {isAdmin && <DetailItem label="Salary / Day" value={employee.per_day_salary ? `${employee.per_day_salary}` : 'N/A'} />}
-                <DetailItem label="Experience Details" value={employee.experience_details} fullWidth />
-                <DetailItem label="Education" value={employee.education} fullWidth />
-                <DetailItem label="Skills" value={employee.skills} fullWidth />
-              </div>
-            </EmployeeDetailsCard>
+            <>
+              <EmployeeDetailsCard title="Professional Experience" icon="💼">
+                <div className="info-grid">
+                  <DetailItem label="Experience (Years)" value={employee.total_experience_years} />
+                  <DetailItem label="Experience Details" value={employee.experience_details} fullWidth />
+                  <DetailItem label="Education" value={employee.education} fullWidth />
+                  <DetailItem label="Skills" value={employee.skills} fullWidth />
+                </div>
+              </EmployeeDetailsCard>
+
+              {isAdmin && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <EmployeeDetailsCard title="Salary Drawn (Onshore & Offshore)" icon="💰">
+                    <div className="info-grid">
+                      <DetailItem label="Onshore Salary" value={employee.onshore_salary} />
+                      <DetailItem label="Offshore Salary" value={employee.offshore_salary} />
+                      <DetailItem label="Onshore OT hrs." value={employee.onshore_ot_hrs} />
+                      <DetailItem label="Offshore OT hrs." value={employee.offshore_ot_hrs} />
+                      <DetailItem label="Allowance" value={employee.allowance} />
+                      {employee.per_day_salary && (
+                        <DetailItem label="Previous Salary / Day" value={employee.per_day_salary} />
+                      )}
+                    </div>
+                  </EmployeeDetailsCard>
+                </div>
+              )}
+            </>
           )}
         </div>
 

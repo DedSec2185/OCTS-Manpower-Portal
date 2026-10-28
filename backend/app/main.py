@@ -52,6 +52,11 @@ for attempt in range(max_retries):
             "ALTER TABLE employees ADD COLUMN IF NOT EXISTS pcc_certificate_path VARCHAR(500);",
             "ALTER TABLE employees ADD COLUMN IF NOT EXISTS photo_file_path VARCHAR(500);",
             "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_details_path VARCHAR(500);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS onshore_salary VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS offshore_salary VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS onshore_ot_hrs VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS offshore_ot_hrs VARCHAR(150);",
+            "ALTER TABLE employees ADD COLUMN IF NOT EXISTS allowance VARCHAR(150);",
         ]
         for mig_sql in migrations:
             try:
